@@ -42,7 +42,7 @@ export const about = {
     [{ text: 'A ' }, { text: 'love letter', accent: true }, { text: ' to' }],
     [{ text: 'games worth ' }, { text: 'remembering', accent: true }],
   ],
-  copy: "This is a space for hidden gems, cult favourites, indie experiments, nostalgic RPGs, underrated worlds and the wonderfully obscure. I favour rich aesthetics, memorable characters, unusual ideas and stories that leave an impression — and I'm slowly building an archive of the games I've fallen in love with along the way.",
+  copy: "This is a space for hidden gems, cult favourites, indie experiments, nostalgic RPGs and the wonderfully obscure. I favour rich aesthetics, memorable characters, unusual ideas and stories that leave an impression and I'm slowly building an archive of the games I've fallen in love with along the way.",
   cta: { label: 'Learn more', href: '/about' },
   caption: ['Every world', 'leaves an impression.'],
   /** Slug of the Contentful "Page" entry shown on /about */
