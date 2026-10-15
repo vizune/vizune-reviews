@@ -322,35 +322,6 @@ const reviewType = import.meta.env.CONTENTFUL_REVIEW_TYPE || 'reviews';
     animation-duration: 1.2s;
   }
 
-  /* Starts visible so a paused/throttled animation never hides the title */
-  @keyframes hud-acquire {
-    0% {
-      opacity: 1;
-    }
-    5% {
-      opacity: 0;
-    }
-    10% {
-      opacity: 1;
-      text-shadow: -2px 0 var(--accent), 2px 0 #ff4fd8;
-    }
-    20% {
-      opacity: 0.2;
-    }
-    35% {
-      opacity: 1;
-      text-shadow: 2px 0 var(--accent), -2px 0 #ff4fd8;
-    }
-    50% {
-      opacity: 0.4;
-    }
-    65%,
-    100% {
-      opacity: 1;
-      text-shadow: 0 0 8px rgb(99 214 197 / 0.6);
-    }
-  }
-
   /* Narrow screens: last signal drops onto its own row */
   @media (max-width: 700px) {
     .hud {

@@ -2,8 +2,10 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
+import Icon from '../../components/Icon.astro';
 import { getReviews } from '../../lib/contentful';
-import { formatDate } from '../../lib/format';
+import { formatDate, pad2 } from '../../lib/format';
+import { contentfulImage, contentfulSrcset } from '../../lib/images';
 import { IMAGE_SIZES, placeholdFor } from '../../lib/placeholder';
 import { renderRichText } from '../../lib/rich-text';
 import type { Review } from '../../lib/types';
@@ -19,76 +21,218 @@ interface Props {
 
 const { review } = Astro.props;
 const html = renderRichText(review.content);
-const [w, h] = IMAGE_SIZES.reviewBanner;
+const [w, h] = IMAGE_SIZES.reviewFeature;
+const banner = review.bannerUrl;
 ---
 
-<BaseLayout title={review.subject} description={review.excerpt || review.headline}>
-  <article>
-    <header class="banner">
-      <img src={placeholdFor('reviewBanner')} width={w} height={h} alt="" fetchpriority="high" />
-      <div class="container banner__text">
-        <p class="label accent">{review.subject}</p>
-        <h1 class="banner__title">{review.headline}</h1>
-        <time class="label" datetime={review.publishDate}>{formatDate(review.publishDate)}</time>
+<BaseLayout title={`${review.subject} Review`} description={review.excerpt || review.headline}>
+  <article class="container review">
+    <nav class="crumbs label" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/reviews">Reviews</a></li>
+        <li aria-current="page">{review.subject}</li>
+      </ol>
+    </nav>
+
+    <header class="review__head">
+      <p class="review__file label" aria-hidden="true">
+        <span class="accent">▸ File</span> <span class="review__sep">//</span> ARC-{pad2(review.index)}
+        <span class="review__tag">Review</span>
+      </p>
+      {/* The tag above is decorative, so screen readers still hear "Crystar Review" here */}
+      <h1 class="review__title display">
+        {review.subject}<span class="visually-hidden"> Review</span>
+      </h1>
+      <p class="review__dek">{review.headline}</p>
+
+      <div class="review__meta label">
+        <time datetime={review.publishDate}>{formatDate(review.publishDate)}</time>
+        <span class="review__sep" aria-hidden="true">//</span>
+        <a class="review__comments" href="#comments">
+          <Icon name="comment" size={15} />
+          Comments
+        </a>
       </div>
     </header>
 
-    <div class="container body">
+    <figure class="review__banner">
+      <img
+        src={banner ? contentfulImage(banner, 1200) : placeholdFor('reviewFeature')}
+        srcset={banner ? contentfulSrcset(banner, [600, 900, 1200]) : undefined}
+        sizes="(min-width: 1100px) 1000px, calc(100vw - 2 * var(--gutter))"
+        width={w}
+        height={h}
+        alt=""
+        fetchpriority="high"
+      />
+      <span class="brackets" aria-hidden="true"></span>
+    </figure>
+
+    <div class="review__body">
       {html ? <div class="prose" set:html={html} /> : <p class="prose">This review is still being written.</p>}
-      <div class="back">
-        <Button href="/reviews" arrow>All reviews</Button>
-      </div>
+    </div>
+
+    <section class="review__comments-section" id="comments" aria-labelledby="comments-title">
+      <h2 id="comments-title" class="label">Comments</h2>
+      <p>Comments are coming soon.</p>
+    </section>
+
+    <div class="review__back">
+      <Button href="/reviews" arrow>All reviews</Button>
     </div>
   </article>
 </BaseLayout>
 
 <style>
-  .banner {
-    position: relative;
+  /* 1000px column for heading and banner, like IGN */
+  .review {
+    max-width: calc(62.5rem + var(--gutter) * 2);
+    /* Same top spacing as the other pages (About, Reviews) */
+    padding-block: var(--section-gap);
+  }
+
+  .crumbs ol {
     display: flex;
-    align-items: flex-end;
-    min-height: clamp(18rem, 38vw, 28rem);
-    overflow: hidden;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--faint);
   }
 
-  .banner img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .crumbs li + li::before {
+    content: '›';
+    margin-right: 0.6rem;
+    color: var(--accent);
+    opacity: 0.6;
   }
 
-  .banner::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(0deg, var(--bg) 5%, rgb(7 24 30 / 0.6) 50%, rgb(7 24 30 / 0.1));
+  .crumbs a {
+    color: var(--accent);
   }
 
-  .banner__text {
+  /* The game name "locks on" once as the page arrives */
+  .crumbs [aria-current='page'] {
+    animation: hud-acquire 0.7s steps(1) 0.35s both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .crumbs [aria-current='page'] {
+      animation: none;
+    }
+  }
+
+  .crumbs a:hover {
+    color: var(--accent-strong);
+  }
+
+  .review__head {
     position: relative;
-    z-index: 1;
-    padding-block: 2.5rem;
+    margin: 1.75rem 0 1.75rem;
   }
 
-  .banner__title {
-    max-width: 45rem;
-    margin: 0.9rem 0 1rem;
-    font-size: clamp(1.8rem, 4vw, 2.9rem);
-    letter-spacing: -0.02em;
-  }
-
-  .banner time {
+  /* Case-file label above the title */
+  .review__file {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
     color: var(--muted);
   }
 
-  .body {
-    max-width: calc(46rem + var(--gutter) * 2);
-    padding-block: 2.5rem var(--section-gap);
+  .review__title {
+    margin-top: 0.9rem;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    line-height: 1.1;
   }
 
-  .back {
-    margin-top: 3rem;
+  /* "REVIEW" as a small teal HUD tag at the end of the file row */
+  .review__tag {
+    margin-left: 0.4rem;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .review__dek {
+    margin-top: 0.75rem;
+    color: var(--muted);
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    line-height: 1.5;
+  }
+
+  .review__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    margin-top: 1.25rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .review__sep {
+    color: var(--accent);
+    opacity: 0.6;
+  }
+
+  .review__comments {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--accent);
+  }
+
+  .review__comments:hover {
+    color: var(--accent-strong);
+  }
+
+  .review__banner {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .review__banner img {
+    width: 100%;
+    aspect-ratio: 1200 / 500;
+    object-fit: cover;
+  }
+
+  /* Text stays ~70 characters per line for comfortable reading */
+  .review__body,
+  .review__dek {
+    max-width: 45rem;
+  }
+
+  .review__body {
+    margin-top: 2.25rem;
+  }
+
+  .review__comments-section {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    /* Leave a little room above when jumping here from the Comments link */
+    scroll-margin-top: 2rem;
+  }
+
+  .review__comments-section h2 {
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  .review__back {
+    margin-top: 2.5rem;
   }
 </style>

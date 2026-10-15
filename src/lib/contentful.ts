@@ -91,8 +91,12 @@ async function fetchReviews(): Promise<Review[]> {
   return reviews;
 }
 
-/** All reviews, ordered by Index. Fetched once per build. */
+/**
+ * All reviews, ordered by Index. Fetched once per build; in `astro dev` it's
+ * fetched on every page load so Contentful edits show up on refresh.
+ */
 export function getReviews(): Promise<Review[]> {
+  if (import.meta.env.DEV) return fetchReviews();
   cache ??= fetchReviews();
   return cache;
 }

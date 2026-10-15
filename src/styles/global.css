@@ -169,6 +169,54 @@ p {
   }
 }
 
+/*
+ * HUD ruler divider: a baseline with a bright lead segment and hanging tick
+ * marks, like an instrument scale. Not used yet; saved for the About page.
+ * Usage: <hr class="hud-ruler" />
+ */
+.hud-ruler {
+  height: 9px;
+  margin: 0;
+  border: 0;
+  background:
+    linear-gradient(var(--accent), var(--accent)) 0 0 / 4rem 1px no-repeat,
+    linear-gradient(var(--border-strong), var(--border-strong)) 0 0 / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--border-strong) 0 1px, transparent 1px 50px) 0 0 / 100% 9px no-repeat,
+    repeating-linear-gradient(90deg, var(--border) 0 1px, transparent 1px 10px) 0 0 / 100% 5px no-repeat;
+}
+
+/*
+ * Glitchy "signal acquired" flicker, shared by the hero HUD and the review
+ * breadcrumb. Starts visible so a paused/throttled animation never hides text.
+ */
+@keyframes hud-acquire {
+  0% {
+    opacity: 1;
+  }
+  5% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    text-shadow: -2px 0 var(--accent), 2px 0 #ff4fd8;
+  }
+  20% {
+    opacity: 0.2;
+  }
+  35% {
+    opacity: 1;
+    text-shadow: 2px 0 var(--accent), -2px 0 #ff4fd8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  65%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgb(99 214 197 / 0.6);
+  }
+}
+
 /* Rich text from Contentful */
 .prose {
   color: var(--muted);

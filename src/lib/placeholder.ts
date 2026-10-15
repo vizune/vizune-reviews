@@ -7,7 +7,6 @@ export function placehold(width: number, height: number): string {
 export const IMAGE_SIZES = {
   about: [720, 420],
   reviewCard: [480, 220],
-  reviewBanner: [1600, 600],
   reviewFeature: [1200, 500],
 } as const satisfies Record<string, readonly [number, number]>;
 
