@@ -20,13 +20,22 @@ interface Props {
 }
 
 const { review } = Astro.props;
+const EMPTY_MESSAGE = 'This review is still being written.';
 const html = renderRichText(review.content);
 const [w, h] = IMAGE_SIZES.reviewFeature;
 const banner = review.bannerUrl;
+
+// Real Contentful entries (not mock data) re-check for edits in the browser
+const live = Boolean(import.meta.env.PUBLIC_cSPACE && import.meta.env.PUBLIC_cACCESS_TOKEN && !review.id.startsWith('mock-'));
+const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
 ---
 
 <BaseLayout title={`${review.subject} Review`} description={review.excerpt || review.headline}>
-  <article class="container review">
+  <article
+    class="container review"
+    data-entry-id={live ? review.id : undefined}
+    data-environment={environment}
+  >
     <nav class="crumbs label" aria-label="Breadcrumb">
       <ol>
         <li><a href="/">Home</a></li>
@@ -70,7 +79,7 @@ const banner = review.bannerUrl;
     </figure>
 
     <div class="review__body">
-      {html ? <div class="prose" set:html={html} /> : <p class="prose">This review is still being written.</p>}
+      <div class="prose" set:html={html || `<p>${EMPTY_MESSAGE}</p>`} />
     </div>
 
     <section class="review__comments-section" id="comments" aria-labelledby="comments-title">
@@ -83,6 +92,54 @@ const banner = review.bannerUrl;
     </div>
   </article>
 </BaseLayout>
+
+<script>
+  import { fetchLiveReview } from '../../lib/live-review';
+  import { renderRichText } from '../../lib/rich-text';
+  import { contentfulImage, contentfulSrcset } from '../../lib/images';
+  import { formatDate } from '../../lib/format';
+
+  // The page ships with the content from its last build; this swaps in any
+  // edits made in Contentful since, so the page never needs re-uploading.
+  const article = document.querySelector<HTMLElement>('.review[data-entry-id]');
+
+  async function refresh(el: HTMLElement) {
+    const space = import.meta.env.PUBLIC_cSPACE;
+    const token = import.meta.env.PUBLIC_cACCESS_TOKEN;
+    const entryId = el.dataset.entryId;
+    if (!space || !token || !entryId) return;
+
+    const review = await fetchLiveReview({
+      space,
+      token,
+      environment: el.dataset.environment ?? 'master',
+      entryId,
+    });
+    if (!review) return;
+
+    const dek = el.querySelector('.review__dek');
+    if (dek && review.headline && dek.textContent !== review.headline) dek.textContent = review.headline;
+
+    const time = el.querySelector('.review__meta time');
+    if (time && review.publishDate && time.getAttribute('datetime') !== review.publishDate) {
+      time.setAttribute('datetime', review.publishDate);
+      time.textContent = formatDate(review.publishDate);
+    }
+
+    const img = el.querySelector<HTMLImageElement>('.review__banner img');
+    if (img && review.bannerUrl && !img.src.startsWith(review.bannerUrl)) {
+      img.srcset = contentfulSrcset(review.bannerUrl, [600, 900, 1200]);
+      img.src = contentfulImage(review.bannerUrl, 1200);
+    }
+
+    const prose = el.querySelector('.review__body .prose');
+    const html = renderRichText(review.content) || '<p>This review is still being written.</p>';
+    if (prose && prose.innerHTML !== html) prose.innerHTML = html;
+  }
+
+  // If Contentful can't be reached, the built version simply stays.
+  if (article) refresh(article).catch(() => {});
+</script>
 
 <style>
   /* 1000px column for heading and banner, like IGN */

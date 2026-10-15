@@ -1,4 +1,5 @@
 ---
+import ComingSoonCard from './ComingSoonCard.astro';
 import ReviewCard from './ReviewCard.astro';
 import SectionHeading from './SectionHeading.astro';
 import type { Review } from '../lib/types';
@@ -8,6 +9,10 @@ interface Props {
 }
 
 const { reviews } = Astro.props;
+
+// Top up the desktop row of 4 with "Coming soon" slots while there are few reviews
+const COLUMNS = 4;
+const fillers = Math.max(0, COLUMNS - reviews.length);
 ---
 
 <section class="section">
@@ -15,6 +20,13 @@ const { reviews } = Astro.props;
     <SectionHeading label="Latest reviews" link={{ label: 'View all', href: '/reviews' }} />
     <div class="grid">
       {reviews.map((review, i) => <ReviewCard review={review} number={i + 1} />)}
+      {
+        Array.from({ length: fillers }, (_, i) => (
+          <div class="filler">
+            <ComingSoonCard number={reviews.length + i + 1} />
+          </div>
+        ))
+      }
     </div>
   </div>
 </section>
@@ -26,9 +38,19 @@ const { reviews } = Astro.props;
     gap: 1rem;
   }
 
+  /* Wrapper keeps the filler the same height as its row neighbours */
+  .filler {
+    display: grid;
+  }
+
   @media (max-width: 1000px) {
     .grid {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* "Coming soon" slots are a desktop-only touch */
+    .filler {
+      display: none;
     }
   }
 

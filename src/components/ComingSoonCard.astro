@@ -1,0 +1,95 @@
+---
+import Icon from './Icon.astro';
+import { pad2 } from '../lib/format';
+
+interface Props {
+  number: number;
+}
+
+const { number } = Astro.props;
+---
+
+{/* Decorative empty slot, same size as a ReviewCard, not a link */}
+<div class="soon" aria-hidden="true">
+  <div class="soon__media">
+    <Icon name="logo" size={34} class="soon__mark" />
+    <span class="soon__status">Signal pending</span>
+  </div>
+  <div class="soon__body">
+    <div class="soon__row">
+      <p class="soon__title">Coming soon</p>
+      <span class="soon__num">{pad2(number)}</span>
+    </div>
+    <p class="soon__sub">The next hidden gem is on its way</p>
+  </div>
+</div>
+
+<style>
+  .soon {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: rgb(10 32 39 / 0.45);
+  }
+
+  /* Same 480:220 shape as a review thumbnail, with faint HUD scanlines */
+  .soon__media {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    aspect-ratio: 480 / 220;
+    border-bottom: 1px dashed var(--border);
+    background: repeating-linear-gradient(0deg, rgb(99 214 197 / 0.035) 0 1px, transparent 1px 6px);
+  }
+
+  .soon :global(.soon__mark) {
+    color: var(--accent);
+    opacity: 0.35;
+  }
+
+  .soon__status {
+    color: var(--faint);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .soon__body {
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .soon__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .soon__title {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .soon__num {
+    color: var(--faint);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+  }
+
+  .soon__sub {
+    margin-top: 0.4rem;
+    overflow: hidden;
+    color: var(--faint);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
