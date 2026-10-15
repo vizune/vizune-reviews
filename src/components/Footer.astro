@@ -167,18 +167,43 @@ const year = new Date().getFullYear();
   }
 
   @media (max-width: 760px) {
+    /* Logo, tagline and HUD stack centred */
+    .footer__brand {
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+
     .footer__hud {
       padding-left: 0;
       border-left: 0;
     }
 
     .footer__actions {
-      flex-wrap: wrap;
-      gap: 1.5rem;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
       margin-left: 0;
+      text-align: center;
+    }
+
+    /* Short glowing divider between the brand stack and the network block */
+    .footer__network::before {
+      content: '';
+      display: block;
+      width: 4rem;
+      height: 1px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .footer__bottom-inner {
+      flex-direction: column;
+      text-align: center;
     }
 
     .footer__bottom ul {
+      justify-content: center;
       gap: 1.25rem;
     }
   }

@@ -45,6 +45,8 @@ export const about = {
   copy: "This is a space for hidden gems, cult favourites, indie experiments, nostalgic RPGs, underrated worlds and the wonderfully obscure. I favour rich aesthetics, memorable characters, unusual ideas and stories that leave an impression — and I'm slowly building an archive of the games I've fallen in love with along the way.",
   cta: { label: 'Learn more', href: '/about' },
   caption: ['Every world', 'leaves an impression.'],
+  /** Slug of the Contentful "Page" entry shown on /about */
+  pageSlug: 'about-vizune-reviews',
   /** Contentful asset ID (not URL) of the image card: "vizune-reviews-about" */
   imageAssetId: 'yjcxL0YeMOrvvBLqVLUQ8',
   features: [

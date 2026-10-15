@@ -10,7 +10,8 @@ interface Props {
 }
 
 const { title, description = site.description } = Astro.props;
-const pageTitle = title ? `${title} — ${site.name}` : site.name;
+// Skip the " — Vizune Reviews" suffix when the title already says it
+const pageTitle = !title ? site.name : title.includes(site.name) ? title : `${title} — ${site.name}`;
 ---
 
 <!doctype html>

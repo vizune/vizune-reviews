@@ -1,8 +1,14 @@
 ---
 import SimplePage from '../components/SimplePage.astro';
 import { about } from '../data/site';
+import { getPageBySlug } from '../lib/contentful';
+import { renderRichText } from '../lib/rich-text';
+
+// Content comes from the Contentful "Page" entry; the homepage copy is the fallback.
+const page = await getPageBySlug(about.pageSlug);
+const html = renderRichText(page?.content);
 ---
 
-<SimplePage title="About" eyebrow={about.label}>
-  <p>{about.copy}</p>
+<SimplePage title={page?.title || 'About'} eyebrow={about.label}>
+  {html ? <Fragment set:html={html} /> : <p>{about.copy}</p>}
 </SimplePage>

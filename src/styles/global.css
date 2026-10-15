@@ -52,10 +52,18 @@ p {
 
 /* Whole-site frame: keeps full-bleed art from stretching on wide monitors */
 .site {
+  /* Column layout so <main> can grow and push the footer to the bottom */
+  display: flex;
+  flex-direction: column;
   max-width: var(--site-max);
   min-height: 100vh;
+  min-height: 100dvh;
   margin-inline: auto;
   background: var(--bg);
+}
+
+.site > main {
+  flex: 1;
 }
 
 @media (min-width: 1601px) {

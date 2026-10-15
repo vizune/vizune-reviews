@@ -104,6 +104,48 @@ export async function getLatestReviews(limit = 4): Promise<Review[]> {
     .slice(0, limit);
 }
 
+/** Field IDs of the shared "Page" content model. */
+interface PageSkeleton extends EntrySkeletonType {
+  contentTypeId: 'page';
+  fields: {
+    pageTitle?: contentful.EntryFieldTypes.Symbol;
+    slug?: contentful.EntryFieldTypes.Symbol;
+    content?: contentful.EntryFieldTypes.RichText;
+  };
+}
+
+export interface Page {
+  title: string;
+  content?: Document;
+}
+
+/**
+ * A "Page" entry, looked up by slug so editing its title in Contentful is safe.
+ * The Page type is shared with other sites, so this site's slugs are unique to it.
+ */
+export async function getPageBySlug(slug: string): Promise<Page | undefined> {
+  if (!client) return undefined;
+  try {
+    const res = await client.withoutUnresolvableLinks.getEntries<PageSkeleton>({
+      content_type: 'page',
+      'fields.slug': slug,
+      limit: 1,
+    });
+    const entry = res.items[0];
+    if (!entry) {
+      console.warn(`[contentful] No published Page with slug "${slug}", using fallback content.`);
+      return undefined;
+    }
+    return {
+      title: entry.fields.pageTitle ?? '',
+      content: entry.fields.content as Document | undefined,
+    };
+  } catch (err) {
+    console.warn(`[contentful] Couldn't load Page "${slug}", using fallback content.`, err);
+    return undefined;
+  }
+}
+
 export interface ContentfulAsset {
   url: string;
   alt: string;

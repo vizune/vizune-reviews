@@ -422,9 +422,33 @@ const reviewType = import.meta.env.CONTENTFUL_REVIEW_TYPE || 'reviews';
     font-size: 0.75rem;
   }
 
+  /* Narrow screens: banner on top at full brightness, text below on solid dark */
   @media (max-width: 900px) {
+    .hero {
+      flex-direction: column;
+      min-height: 0;
+      background: var(--bg-deep);
+    }
+
+    .hero__art {
+      position: relative;
+      inset: auto;
+      aspect-ratio: 2 / 1;
+      max-height: 24rem;
+    }
+
+    /* Keep the character centred in the tighter crop */
+    .hero__art img {
+      object-position: 62% center;
+    }
+
+    /* Short fade so the banner melts into the text panel */
     .hero__art::after {
-      background: rgb(4 16 21 / 0.7);
+      background: linear-gradient(0deg, var(--bg-deep) 0%, transparent 30%);
+    }
+
+    .hero__content {
+      padding-block: 0.75rem 2.5rem;
     }
 
     .hero__rail {
