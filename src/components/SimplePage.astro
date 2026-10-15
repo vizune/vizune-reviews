@@ -7,16 +7,32 @@ interface Props {
 }
 
 const { title, eyebrow } = Astro.props;
+// Pages that pass an "aside" slot get a wider two-column layout on desktop
+const hasAside = Astro.slots.has('aside');
 ---
 
 <BaseLayout title={title}>
   <section class="page">
-    <div class="container page__inner">
-      {eyebrow && <p class="label accent">{eyebrow}</p>}
-      <h1 class="page__title display">{title}</h1>
-      <div class="prose">
-        <slot />
+    <div class:list={['container', 'page__inner', { 'page__inner--aside': hasAside }]}>
+      <div class="page__main">
+        {eyebrow && <p class="label accent">{eyebrow}</p>}
+        <h1 class="page__title display">{title}</h1>
+        <div class="prose">
+          <slot />
+        </div>
+        {/* Extra blocks after the article text, outside the prose styles */}
+        <slot name="after" />
       </div>
+
+      {
+        hasAside && (
+          <aside class="page__aside">
+            <div class="page__aside-inner">
+              <slot name="aside" />
+            </div>
+          </aside>
+        )
+      }
     </div>
   </section>
 </BaseLayout>
@@ -30,8 +46,50 @@ const { title, eyebrow } = Astro.props;
     max-width: calc(46rem + var(--gutter) * 2);
   }
 
+  /* Text column + sidebar, 1000px overall like the review pages */
+  .page__inner--aside {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    align-items: start;
+    gap: 2.5rem;
+    max-width: calc(62.5rem + var(--gutter) * 2);
+  }
+
   .page__title {
     margin: 1rem 0 1.75rem;
     font-size: clamp(1.8rem, 4vw, 2.6rem);
+  }
+
+  /* Line the sidebar up with the title, and keep it in view while scrolling
+     on screens tall enough to show all of it */
+  .page__aside {
+    align-self: stretch;
+    padding-top: 2.4rem;
+  }
+
+  /* The specs panel is ~850px tall; on shorter screens a sticky sidebar would
+     hide its bottom, so it just scrolls normally there */
+  @media (min-height: 940px) {
+    .page__aside-inner {
+      position: sticky;
+      top: 2rem;
+    }
+  }
+
+  /* Tablets and phones: no room beside the text, so the sidebar follows it */
+  @media (max-width: 1000px) {
+    .page__inner--aside {
+      grid-template-columns: 1fr;
+      max-width: calc(46rem + var(--gutter) * 2);
+      gap: 3rem;
+    }
+
+    .page__aside {
+      padding-top: 0;
+    }
+
+    .page__aside-inner {
+      position: static;
+    }
   }
 </style>

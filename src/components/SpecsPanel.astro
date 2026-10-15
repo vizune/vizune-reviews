@@ -1,0 +1,212 @@
+---
+import Icon from './Icon.astro';
+import { specs } from '../data/site';
+---
+
+<section class="specs" aria-labelledby="specs-title">
+  <header class="specs__head">
+    <h2 id="specs-title" class="specs__title label">
+      <span class="accent" aria-hidden="true">▸</span>
+      {specs.title}
+    </h2>
+    <p class="specs__code label" aria-hidden="true">
+      <span class="specs__dot"></span>{specs.code}
+    </p>
+  </header>
+
+  <hr class="hud-ruler" />
+
+  <dl class="specs__list">
+    {
+      specs.pc.map((item) => (
+        <div class="specs__row">
+          <dt class="label">{item.label}</dt>
+          <dd>{item.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  {
+    specs.platforms.length > 0 && (
+      <div class="specs__platforms">
+        <p class="specs__platforms-label label">
+          <Icon name="gamepad" size={16} /> Also playing on
+        </p>
+        <ul>
+          {specs.platforms.map((p) => (
+            <li>{p}</li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  {/* Static HUD corner brackets */}
+  <span class="specs__corner specs__corner--tl" aria-hidden="true"></span>
+  <span class="specs__corner specs__corner--br" aria-hidden="true"></span>
+</section>
+
+<style>
+  .specs {
+    position: relative;
+    /* Lay out by the panel's own width, so it fits a sidebar or a full row */
+    container: specs / inline-size;
+    padding: 1.5rem 1.75rem 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background:
+      repeating-linear-gradient(0deg, rgb(99 214 197 / 0.025) 0 1px, transparent 1px 6px),
+      var(--surface);
+  }
+
+  .specs__corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--accent);
+    filter: drop-shadow(0 0 4px rgb(99 214 197 / 0.6));
+  }
+
+  .specs__corner--tl {
+    top: 8px;
+    left: 8px;
+    border-right: 0;
+    border-bottom: 0;
+  }
+
+  .specs__corner--br {
+    right: 8px;
+    bottom: 8px;
+    border-left: 0;
+    border-top: 0;
+  }
+
+  .specs__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .specs__title {
+    display: flex;
+    gap: 0.6rem;
+    margin: 0;
+    color: var(--text);
+    font-size: 0.75rem;
+  }
+
+  .specs__code {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.6rem;
+  }
+
+  .specs__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .specs__list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 2rem;
+    margin: 1.1rem 0 0;
+  }
+
+  .specs__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .specs__row dt {
+    color: var(--accent);
+    font-size: 0.6rem;
+  }
+
+  .specs__row dd {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .specs__platforms {
+    margin-top: 1.4rem;
+  }
+
+  .specs__platforms-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    color: var(--muted);
+    font-size: 0.6rem;
+  }
+
+  .specs__platforms-label :global(svg) {
+    color: var(--accent);
+  }
+
+  .specs__platforms ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .specs__platforms li {
+    margin: 0;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 2px;
+    color: var(--text);
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
+
+  /* Narrow panel (sidebar or phone): one column, tighter rows */
+  @container specs (max-width: 30rem) {
+    .specs__list {
+      grid-template-columns: 1fr;
+      margin-top: 0.6rem;
+    }
+
+    .specs__row {
+      gap: 0.15rem;
+      padding: 0.6rem 0;
+    }
+
+    .specs__row dd {
+      font-size: 0.85rem;
+    }
+
+    .specs__platforms {
+      margin-top: 1.1rem;
+    }
+
+    .specs__platforms li {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .specs {
+      padding: 1.25rem 1.25rem 1.5rem;
+    }
+  }
+</style>

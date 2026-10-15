@@ -1,5 +1,6 @@
 ---
 import SimplePage from '../components/SimplePage.astro';
+import SpecsPanel from '../components/SpecsPanel.astro';
 import { about } from '../data/site';
 import { getPageBySlug } from '../lib/contentful';
 import { renderRichText } from '../lib/rich-text';
@@ -11,4 +12,5 @@ const html = renderRichText(page?.content);
 
 <SimplePage title={page?.title || 'About'} eyebrow={about.label}>
   {html ? <Fragment set:html={html} /> : <p>{about.copy}</p>}
+  <SpecsPanel slot="aside" />
 </SimplePage>

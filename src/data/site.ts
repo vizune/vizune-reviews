@@ -56,3 +56,26 @@ export const about = {
     { icon: 'gamepad', title: 'Nostalgic RPGs', text: 'Stories that stay with you' },
   ],
 } as const;
+
+/**
+ * Gaming setup panel at the end of /about. Shown in this order, two per row
+ * on desktop: core PC parts first, then OS, then display and peripherals.
+ */
+export const specs = {
+  title: 'System specs',
+  code: 'RIG-01',
+  pc: [
+    { label: 'Processor', value: 'AMD Ryzen 5 7600X' },
+    { label: 'Graphics card', value: 'NVIDIA GeForce RTX 4070 SUPER Founders Edition' },
+    { label: 'Motherboard', value: 'MSI B650 Gaming Plus WiFi' },
+    { label: 'RAM', value: 'Corsair Vengeance RGB DDR5 32GB' },
+    { label: 'CPU cooler', value: 'DeepCool Infinity Series LS520' },
+    { label: 'Power supply', value: 'Corsair CX750 80+ Bronze' },
+    { label: 'OS', value: 'Windows 11' },
+    { label: 'Monitor', value: 'LG 34UM68-P' },
+    { label: 'Headset', value: 'Sennheiser Momentum 4' },
+    { label: 'Controller', value: 'Steam Controller' },
+  ],
+  /** Shown as tags under the PC specs: modern first, then retro handhelds and consoles */
+  platforms: ['Steam Deck', 'Nintendo Switch', 'Nintendo 3DS', 'Nintendo DSi', 'PS3', 'PSP'],
+};
