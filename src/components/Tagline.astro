@@ -1,0 +1,31 @@
+---
+import { site } from '../data/site';
+---
+
+<p class="tagline">
+  {
+    site.tagline.map((word, i) => (
+      <>
+        {i > 0 && <span class="tagline__sep">×</span>}
+        <span>{word}</span>
+      </>
+    ))
+  }
+</p>
+
+<style>
+  .tagline {
+    display: flex;
+    gap: 0.7rem;
+    color: var(--faint);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .tagline__sep {
+    color: var(--accent);
+    opacity: 0.6;
+  }
+</style>

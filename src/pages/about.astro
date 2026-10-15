@@ -1,0 +1,8 @@
+---
+import SimplePage from '../components/SimplePage.astro';
+import { about } from '../data/site';
+---
+
+<SimplePage title="About" eyebrow={about.label}>
+  <p>{about.copy}</p>
+</SimplePage>

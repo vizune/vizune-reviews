@@ -1,0 +1,185 @@
+---
+import Button from './Button.astro';
+import Logo from './Logo.astro';
+import Tagline from './Tagline.astro';
+import { nav, network, site } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer__top">
+    <div class="footer__brand">
+      <Logo size="lg" />
+      <Tagline />
+      <p class="footer__hud" aria-hidden="true">
+        <span class="footer__dot"></span>Online <span class="footer__sep">//</span>
+        <time data-footer-clock>--:--:--</time>
+      </p>
+    </div>
+
+    <div class="footer__actions">
+      <p class="footer__network label">Part of the <span class="accent">{network.name}</span></p>
+      <Button href={network.url} external arrow>Visit vizune.net</Button>
+    </div>
+  </div>
+
+  <div class="footer__bottom">
+    <div class="container footer__bottom-inner">
+      <p>© {year} {site.name}. All rights reserved.</p>
+      <nav aria-label="Footer">
+        <ul>
+          {nav.map((item) => (
+            <li>
+              <a href={item.href} {...(item.external && { target: '_blank', rel: 'noopener' })}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // HUD clock in the visitor's local time
+  const clock = document.querySelector<HTMLTimeElement>('[data-footer-clock]');
+  if (clock) {
+    const fmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const tick = () => {
+      const now = new Date();
+      clock.textContent = fmt.format(now);
+      clock.dateTime = now.toISOString();
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+</script>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--border);
+    background: var(--bg-deep);
+  }
+
+  .footer__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding-block: 2.25rem;
+  }
+
+  .footer__brand {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem 1.75rem;
+  }
+
+  .footer__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    /* Stays on the right even when it wraps under the brand */
+    margin-left: auto;
+  }
+
+  /* Divider + mini HUD readout */
+  .footer__hud {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-left: 1.75rem;
+    border-left: 1px solid var(--border);
+    color: var(--faint);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .footer__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: footer-pulse 2s ease-in-out infinite;
+  }
+
+  .footer__sep {
+    color: var(--accent);
+    opacity: 0.6;
+  }
+
+  .footer__hud time {
+    color: var(--muted);
+  }
+
+  @keyframes footer-pulse {
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer__dot {
+      animation: none;
+    }
+  }
+
+  .footer__network {
+    color: var(--muted);
+  }
+
+  .footer__bottom {
+    border-top: 1px solid var(--border);
+  }
+
+  .footer__bottom-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-block: 1.1rem;
+    color: var(--faint);
+    font-size: 0.75rem;
+  }
+
+  .footer__bottom ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__bottom a {
+    color: var(--muted);
+  }
+
+  .footer__bottom a:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 760px) {
+    .footer__hud {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .footer__actions {
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-left: 0;
+    }
+
+    .footer__bottom ul {
+      gap: 1.25rem;
+    }
+  }
+</style>

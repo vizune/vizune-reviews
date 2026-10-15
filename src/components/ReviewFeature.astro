@@ -1,0 +1,150 @@
+---
+import Icon from './Icon.astro';
+import type { Review } from '../lib/types';
+import { contentfulImage, contentfulSrcset } from '../lib/images';
+import { IMAGE_SIZES, placeholdFor } from '../lib/placeholder';
+import { formatDate, pad2 } from '../lib/format';
+
+interface Props {
+  review: Review;
+  number: number;
+  eager?: boolean;
+}
+
+const { review, number, eager = false } = Astro.props;
+const [w, h] = IMAGE_SIZES.reviewFeature;
+const src = review.bannerUrl ? contentfulImage(review.bannerUrl, 1200) : placeholdFor('reviewFeature');
+const srcset = review.bannerUrl ? contentfulSrcset(review.bannerUrl, [600, 900, 1200]) : undefined;
+---
+
+<a class="feature" href={`/reviews/${review.slug}`}>
+  <img
+    class="feature__img"
+    src={src}
+    srcset={srcset}
+    sizes="(min-width: 1290px) 1200px, calc(100vw - 2 * var(--gutter))"
+    width={w}
+    height={h}
+    alt=""
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : undefined}
+  />
+  <div class="feature__body">
+    <p class="feature__meta label">
+      <span class="feature__num">{pad2(number)}</span>
+      <span class="accent">{review.subject}</span>
+    </p>
+    <h2 class="feature__title">{review.headline}</h2>
+    {review.excerpt && <p class="feature__excerpt">{review.excerpt}</p>}
+    <div class="feature__foot">
+      <time class="label" datetime={review.publishDate}>{formatDate(review.publishDate)}</time>
+      <span class="feature__cta label">Read review <Icon name="arrow" size={14} /></span>
+    </div>
+  </div>
+  <span class="brackets" aria-hidden="true"></span>
+</a>
+
+<style>
+  .feature {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    aspect-ratio: 1200 / 500;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition:
+      border-color 0.25s,
+      box-shadow 0.25s;
+  }
+
+  .feature:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--glow);
+  }
+
+  .feature__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .feature:hover .feature__img {
+    transform: scale(1.03);
+  }
+
+  .feature::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(0deg, rgb(4 16 21 / 0.95) 0%, rgb(4 16 21 / 0.55) 40%, transparent 70%),
+      linear-gradient(90deg, rgb(4 16 21 / 0.6) 0%, transparent 60%);
+  }
+
+  .feature__body {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 44rem;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+  }
+
+  .feature__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .feature__num {
+    color: var(--muted);
+  }
+
+  .feature__title {
+    margin: 0.75rem 0 0.6rem;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .feature__excerpt {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .feature__foot {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1.1rem;
+    color: var(--muted);
+  }
+
+  .feature__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+  }
+
+  .feature__cta :global(svg) {
+    transition: transform 0.25s;
+  }
+
+  .feature:hover .feature__cta :global(svg) {
+    transform: translateX(3px);
+  }
+
+  /* Too short at banner ratio on small screens: let the text set the height */
+  @media (max-width: 760px) {
+    .feature {
+      aspect-ratio: auto;
+      min-height: 22rem;
+    }
+  }
+</style>

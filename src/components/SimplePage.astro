@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+interface Props {
+  title: string;
+  eyebrow?: string;
+}
+
+const { title, eyebrow } = Astro.props;
+---
+
+<BaseLayout title={title}>
+  <section class="page">
+    <div class="container page__inner">
+      {eyebrow && <p class="label accent">{eyebrow}</p>}
+      <h1 class="page__title display">{title}</h1>
+      <div class="prose">
+        <slot />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--section-gap);
+  }
+
+  .page__inner {
+    max-width: calc(46rem + var(--gutter) * 2);
+  }
+
+  .page__title {
+    margin: 1rem 0 1.75rem;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+  }
+</style>

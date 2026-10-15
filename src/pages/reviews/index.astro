@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ReviewFeature from '../../components/ReviewFeature.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import { getReviews } from '../../lib/contentful';
+
+const reviews = await getReviews();
+---
+
+<BaseLayout title="Reviews">
+  <section class="page">
+    <div class="container">
+      <SectionHeading label="All reviews" as="h1" />
+      <div class="list">
+        {reviews.map((review, i) => <ReviewFeature review={review} number={i + 1} eager={i === 0} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--section-gap);
+  }
+
+  .list {
+    display: grid;
+    gap: 1.5rem;
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+import Icon from './Icon.astro';
+import { site } from '../data/site';
+
+interface Props {
+  size?: 'md' | 'lg';
+}
+
+const { size = 'md' } = Astro.props;
+---
+
+<a class:list={['logo', `logo--${size}`]} href="/" aria-label={`${site.name} home`}>
+  <Icon name="logo" size={size === 'lg' ? 40 : 36} class="logo__mark" />
+  <span class="logo__words" aria-hidden="true">
+    <span class="logo__text">{site.logoText}</span>
+    <span class="logo__sub">{site.logoSub}</span>
+  </span>
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--text);
+  }
+
+  .logo :global(.logo__mark) {
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+
+  .logo__words {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .logo__text {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    line-height: 1;
+    /* Trailing tracking would leave a gap after the last letter */
+    letter-spacing: 0.2em;
+    margin-right: -0.2em;
+  }
+
+  .logo__sub {
+    color: var(--accent);
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 0.2rem;
+    /* Balance the tracking added after the last letter so it centres truly */
+    padding-left: 0.3em;
+  }
+
+  .logo--lg .logo__text {
+    font-size: 1.45rem;
+  }
+
+  .logo--lg .logo__sub {
+    font-size: 0.65rem;
+  }
+</style>

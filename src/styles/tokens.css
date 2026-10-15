@@ -1,0 +1,27 @@
+:root {
+  /* Palette (from the splash page) */
+  --bg: #07181e;
+  --bg-deep: #041015;
+  --surface: #0a2027;
+  --surface-2: #0d2930;
+  --text: #eaf8f6;
+  --muted: #9cb8b7;
+  --faint: #5f7d7d;
+  --accent: #63d6c5;
+  --accent-strong: #46e0cb;
+  --border: rgb(99 214 197 / 0.18);
+  --border-strong: rgb(99 214 197 / 0.45);
+  --glow: 0 0 24px rgb(99 214 197 / 0.25);
+
+  /* Type */
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-display: 'Michroma', 'Manrope', sans-serif;
+  --tracking-label: 0.3em;
+
+  /* Layout */
+  --site-max: 1600px;
+  --container: 1200px;
+  --gutter: clamp(16px, 4vw, 44px);
+  --radius: 6px;
+  --section-gap: clamp(3rem, 6vw, 4.5rem);
+}

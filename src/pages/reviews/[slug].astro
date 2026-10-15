@@ -1,0 +1,94 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/Button.astro';
+import { getReviews } from '../../lib/contentful';
+import { formatDate } from '../../lib/format';
+import { IMAGE_SIZES, placeholdFor } from '../../lib/placeholder';
+import { renderRichText } from '../../lib/rich-text';
+import type { Review } from '../../lib/types';
+
+export const getStaticPaths = (async () => {
+  const reviews = await getReviews();
+  return reviews.map((review) => ({ params: { slug: review.slug }, props: { review } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  review: Review;
+}
+
+const { review } = Astro.props;
+const html = renderRichText(review.content);
+const [w, h] = IMAGE_SIZES.reviewBanner;
+---
+
+<BaseLayout title={review.subject} description={review.excerpt || review.headline}>
+  <article>
+    <header class="banner">
+      <img src={placeholdFor('reviewBanner')} width={w} height={h} alt="" fetchpriority="high" />
+      <div class="container banner__text">
+        <p class="label accent">{review.subject}</p>
+        <h1 class="banner__title">{review.headline}</h1>
+        <time class="label" datetime={review.publishDate}>{formatDate(review.publishDate)}</time>
+      </div>
+    </header>
+
+    <div class="container body">
+      {html ? <div class="prose" set:html={html} /> : <p class="prose">This review is still being written.</p>}
+      <div class="back">
+        <Button href="/reviews" arrow>All reviews</Button>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .banner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: clamp(18rem, 38vw, 28rem);
+    overflow: hidden;
+  }
+
+  .banner img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, var(--bg) 5%, rgb(7 24 30 / 0.6) 50%, rgb(7 24 30 / 0.1));
+  }
+
+  .banner__text {
+    position: relative;
+    z-index: 1;
+    padding-block: 2.5rem;
+  }
+
+  .banner__title {
+    max-width: 45rem;
+    margin: 0.9rem 0 1rem;
+    font-size: clamp(1.8rem, 4vw, 2.9rem);
+    letter-spacing: -0.02em;
+  }
+
+  .banner time {
+    color: var(--muted);
+  }
+
+  .body {
+    max-width: calc(46rem + var(--gutter) * 2);
+    padding-block: 2.5rem var(--section-gap);
+  }
+
+  .back {
+    margin-top: 3rem;
+  }
+</style>

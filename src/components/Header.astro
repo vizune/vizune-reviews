@@ -1,0 +1,168 @@
+---
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import Tagline from './Tagline.astro';
+import { nav } from '../data/site';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) => (href === '/' ? path === '/' : href.startsWith('/') && path.startsWith(href));
+---
+
+<header class="header">
+  <div class="container header__inner">
+    <div class="header__brand">
+      <Logo />
+      <div class="header__tagline"><Tagline /></div>
+    </div>
+
+    <button class="header__toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+      <Icon name="menu" size={24} />
+      <span class="visually-hidden">Menu</span>
+    </button>
+
+    <nav class="header__nav" id="site-nav" aria-label="Main">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={{ active: isActive(item.href) }}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                {...(item.external && { target: '_blank', rel: 'noopener' })}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.header__toggle');
+  const nav = document.getElementById('site-nav');
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    nav?.classList.toggle('is-open', !open);
+  });
+</script>
+
+<style>
+  .header {
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    background: rgb(7 24 30 / 0.85);
+    backdrop-filter: blur(8px);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4.6rem;
+  }
+
+  .header__brand {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .header__nav {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .header__nav ul {
+    display: flex;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .header__nav ul a {
+    position: relative;
+    display: block;
+    padding-block: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+
+  .header__nav ul a:hover,
+  .header__nav ul a.active {
+    color: var(--accent);
+  }
+
+  .header__nav ul a.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.55rem;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .header__toggle {
+    display: none;
+    padding: 0.4rem;
+    border: 0;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  @media (max-width: 1000px) {
+    .header__tagline {
+      display: none;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .header__toggle {
+      display: block;
+    }
+
+    .header__nav {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0.5rem var(--gutter) 1.25rem;
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header__nav.is-open {
+      display: flex;
+    }
+
+    .header__nav ul {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .header__nav ul a {
+      padding-block: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header__nav ul a.active::after {
+      display: none;
+    }
+  }
+</style>

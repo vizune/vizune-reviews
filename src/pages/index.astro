@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import AboutSection from '../components/AboutSection.astro';
+import LatestReviews from '../components/LatestReviews.astro';
+import { getLatestReviews, getReviews } from '../lib/contentful';
+
+const [all, latest] = await Promise.all([getReviews(), getLatestReviews(4)]);
+---
+
+<BaseLayout>
+  <Hero reviewCount={all.length} latestSubject={latest[0]?.subject} />
+  <AboutSection />
+  <LatestReviews reviews={latest} />
+</BaseLayout>

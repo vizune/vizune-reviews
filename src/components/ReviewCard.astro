@@ -1,0 +1,113 @@
+---
+import type { Review } from '../lib/types';
+import { IMAGE_SIZES, placeholdFor } from '../lib/placeholder';
+import { contentfulImage, contentfulSrcset } from '../lib/images';
+import { pad2 } from '../lib/format';
+
+interface Props {
+  review: Review;
+  number: number;
+}
+
+const { review, number } = Astro.props;
+const [w, h] = IMAGE_SIZES.reviewCard;
+const thumb = review.thumbnailUrl;
+---
+
+<a class="card" href={`/reviews/${review.slug}`}>
+  <div class="card__media">
+    <img
+      src={thumb ? contentfulImage(thumb, 480) : placeholdFor('reviewCard')}
+      srcset={thumb ? contentfulSrcset(thumb, [320, 480, 640]) : undefined}
+      sizes="(min-width: 1000px) 300px, (min-width: 560px) 50vw, 100vw"
+      width={w}
+      height={h}
+      alt=""
+      loading="lazy"
+    />
+    <span class="card__media-num">{pad2(number)}</span>
+  </div>
+  <div class="card__body">
+    <div class="card__row">
+      <h3 class="card__title">{review.subject}</h3>
+      <span class="card__num">{pad2(number)}</span>
+    </div>
+    <p class="card__sub">{review.headline}</p>
+  </div>
+  <span class="brackets" aria-hidden="true"></span>
+</a>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition:
+      transform 0.25s,
+      border-color 0.25s,
+      box-shadow 0.25s;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    box-shadow: var(--glow);
+  }
+
+  .card__media {
+    position: relative;
+  }
+
+  .card__media img {
+    width: 100%;
+    aspect-ratio: 480 / 220;
+    object-fit: cover;
+    /* Square thumbnails usually frame the face in the upper third */
+    object-position: center 20%;
+  }
+
+  .card__media-num {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.4rem;
+    color: var(--text);
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.8);
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  .card__body {
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .card__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .card__title {
+    font-size: 0.95rem;
+  }
+
+  .card__num {
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+  }
+
+  .card__sub {
+    margin-top: 0.4rem;
+    overflow: hidden;
+    color: var(--faint);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

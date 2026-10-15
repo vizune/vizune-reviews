@@ -1,0 +1,438 @@
+---
+import { Image } from 'astro:assets';
+import Button from './Button.astro';
+import { hero } from '../data/site';
+import heroBanner from '../assets/geometric-header-1600.png';
+import { pad2 } from '../lib/format';
+
+interface Props {
+  /** Number of published reviews, shown in the HUD readout */
+  reviewCount: number;
+  /** Game/work of the most recent review, shown as the "last signal" */
+  latestSubject?: string;
+}
+
+const { reviewCount, latestSubject } = Astro.props;
+const year = new Date().getFullYear();
+
+// The HUD re-checks Contentful in the browser so it's current without a rebuild.
+const live = Boolean(import.meta.env.PUBLIC_cSPACE && import.meta.env.PUBLIC_cACCESS_TOKEN);
+const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
+const reviewType = import.meta.env.CONTENTFUL_REVIEW_TYPE || 'reviews';
+---
+
+<section class="hero">
+  <div class="hero__art" aria-hidden="true">
+    <Image
+      src={heroBanner}
+      alt=""
+      widths={[800, 1200, 1600]}
+      sizes="(min-width: 1600px) 1600px, 100vw"
+      format="webp"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </div>
+
+  <div class="container hero__inner">
+    <div class="hero__content">
+      <p class="label accent">{hero.eyebrow}</p>
+      <h1 class="hero__title display">
+        <span>{hero.titleLine1}</span>
+        <span class="accent">{hero.titleLine2}</span>
+      </h1>
+      <p class="hero__copy">{hero.copy}</p>
+      <div class="hero__ctas">
+        <Button href={hero.primaryCta.href} variant="solid" arrow>{hero.primaryCta.label}</Button>
+        <Button href={hero.secondaryCta.href}>{hero.secondaryCta.label}</Button>
+      </div>
+      <div
+        class="hud"
+        aria-hidden="true"
+        data-live={live ? 'true' : undefined}
+        data-environment={environment}
+        data-type={reviewType}
+      >
+        <span class="hud__status"><span class="hud__dot"></span><span data-hud-status>Scanning</span></span>
+        <span class="hud__bars">
+          {Array.from({ length: 12 }, (_, i) => <span style={`--i: ${i}`}></span>)}
+        </span>
+        <span class="hud__code">ARC-<span data-hud-count>{pad2(reviewCount)}</span> <span class="hud__sep">//</span> {year}</span>
+        <span class="hud__signal" hidden={!latestSubject}>
+          Last signal <span class="hud__sep">:</span> <span class="hud__target" data-hud-target>{latestSubject}</span>
+        </span>
+      </div>
+    </div>
+
+    <aside class="hero__rail label" aria-hidden="true">
+      <p>{hero.railTop[0]}<br />{hero.railTop[1]}</p>
+      <span class="hero__rail-line"></span>
+      <p class="hero__rail-slashes">///</p>
+      <p>
+        {hero.railBottom.map((line) => (<>{line}<br /></>))}
+      </p>
+    </aside>
+  </div>
+</section>
+
+<script>
+  interface LatestResponse {
+    total: number;
+    items: Array<{ fields: { title?: string; name?: string } }>;
+  }
+
+  const hud = document.querySelector<HTMLElement>('.hud[data-live]');
+
+  async function scan(el: HTMLElement) {
+    const space = import.meta.env.PUBLIC_cSPACE;
+    const token = import.meta.env.PUBLIC_cACCESS_TOKEN;
+    const { environment, type } = el.dataset;
+    const params = new URLSearchParams({
+      content_type: type ?? 'reviews',
+      order: '-fields.publishDate',
+      limit: '1',
+      select: 'fields.title,fields.name',
+    });
+    const res = await fetch(
+      `https://cdn.contentful.com/spaces/${space}/environments/${environment}/entries?${params}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!res.ok) throw new Error(`Contentful ${res.status}`);
+    const data: LatestResponse = await res.json();
+    const latest = data.items[0]?.fields;
+    if (!latest) return;
+
+    const target = el.querySelector<HTMLElement>('[data-hud-target]');
+    const signal = target?.closest<HTMLElement>('.hud__signal');
+    const count = el.querySelector<HTMLElement>('[data-hud-count]');
+    const status = el.querySelector<HTMLElement>('[data-hud-status]');
+
+    if (target) target.textContent = latest.title ?? latest.name ?? '';
+    if (signal) signal.hidden = false;
+    if (count) count.textContent = String(data.total).padStart(2, '0');
+    if (status) status.textContent = 'Locked';
+    el.classList.add('is-locked');
+    if (target) glitch(target);
+  }
+
+  /** How often the last-signal title re-flickers, like a signal check. */
+  const GLITCH_EVERY_MS = 6000;
+
+  function glitch(target: HTMLElement) {
+    target.classList.remove('is-glitching');
+    void target.offsetWidth; // restart the CSS animation
+    target.classList.add('is-glitching');
+  }
+
+  const target = document.querySelector<HTMLElement>('.hud [data-hud-target]');
+  if (target) {
+    setInterval(() => {
+      if (!document.hidden) glitch(target);
+    }, GLITCH_EVERY_MS);
+  }
+
+  // Keep the build-time values if Contentful can't be reached.
+  if (hud) scan(hud).catch(() => {});
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    /* Max 500px = the banner's native height, so it's never upscaled at 1600px */
+    min-height: clamp(30rem, 40vw, 31.25rem);
+    display: flex;
+    background:
+      radial-gradient(ellipse at 70% 40%, rgb(99 214 197 / 0.18), transparent 60%),
+      linear-gradient(135deg, #062027, var(--bg-deep));
+  }
+
+  .hero__art {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero__art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 65% center;
+  }
+
+  /* Darken the left side for the copy and the right edge for the rail */
+  .hero__art::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgb(4 16 21 / 0.92) 0%, rgb(4 16 21 / 0.7) 30%, transparent 55%),
+      linear-gradient(270deg, rgb(4 16 21 / 0.75) 0%, transparent 18%);
+  }
+
+  .hero__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .hero__content {
+    max-width: 30rem;
+    padding-block: 2.5rem 2rem;
+  }
+
+  .hero__title {
+    display: flex;
+    flex-direction: column;
+    margin: 1.25rem 0 1.4rem;
+    font-size: clamp(2.6rem, 6vw, 4.4rem);
+    line-height: 1.05;
+  }
+
+  .hero__copy {
+    max-width: 22rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  /* Sci-fi HUD readout */
+  .hud {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding: 0.55rem 0.9rem;
+    color: var(--faint);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    /* Can be wider than the text column; the art sits behind it */
+    width: max-content;
+    background: rgb(4 16 21 / 0.45);
+  }
+
+  /* Corner brackets */
+  .hud::before,
+  .hud::after {
+    content: '';
+    position: absolute;
+    width: 0.6rem;
+    height: 0.6rem;
+    border: 1px solid var(--accent);
+  }
+
+  .hud::before {
+    top: 0;
+    left: 0;
+    border-right: 0;
+    border-bottom: 0;
+  }
+
+  .hud::after {
+    right: 0;
+    bottom: 0;
+    border-left: 0;
+    border-top: 0;
+  }
+
+  .hud__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+  }
+
+  .hud__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: hud-pulse 1.6s ease-in-out infinite;
+  }
+
+  .hud__bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 10px;
+  }
+
+  .hud__bars span {
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0.2;
+    animation: hud-scan 2.4s linear infinite;
+    animation-delay: calc(var(--i) * 0.1s);
+  }
+
+  .hud__sep {
+    color: var(--accent);
+    opacity: 0.6;
+  }
+
+  .hud__signal {
+    padding-left: 1rem;
+    border-left: 1px solid var(--border-strong);
+  }
+
+  .hud__target {
+    color: var(--text);
+  }
+
+  /* Blinking terminal cursor */
+  .hud__target::after {
+    content: '_';
+    margin-left: 0.15em;
+    color: var(--accent);
+    animation: hud-blink 1s steps(1) infinite;
+  }
+
+  @keyframes hud-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Live data arrived: signal locks on with a glitchy flicker */
+  .hud.is-locked .hud__dot {
+    animation: none;
+    box-shadow: 0 0 10px var(--accent-strong);
+  }
+
+  .hud__target.is-glitching {
+    animation: hud-acquire 0.7s steps(1) both;
+  }
+
+  .hud.is-locked .hud__bars span {
+    animation-duration: 1.2s;
+  }
+
+  /* Starts visible so a paused/throttled animation never hides the title */
+  @keyframes hud-acquire {
+    0% {
+      opacity: 1;
+    }
+    5% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+      text-shadow: -2px 0 var(--accent), 2px 0 #ff4fd8;
+    }
+    20% {
+      opacity: 0.2;
+    }
+    35% {
+      opacity: 1;
+      text-shadow: 2px 0 var(--accent), -2px 0 #ff4fd8;
+    }
+    50% {
+      opacity: 0.4;
+    }
+    65%,
+    100% {
+      opacity: 1;
+      text-shadow: 0 0 8px rgb(99 214 197 / 0.6);
+    }
+  }
+
+  /* Narrow screens: last signal drops onto its own row */
+  @media (max-width: 700px) {
+    .hud {
+      width: auto;
+      flex-wrap: wrap;
+      row-gap: 0.5rem;
+    }
+
+    .hud__signal {
+      flex-basis: 100%;
+      padding: 0.5rem 0 0;
+      border-left: 0;
+      border-top: 1px solid var(--border);
+    }
+  }
+
+  @keyframes hud-pulse {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @keyframes hud-scan {
+    0%,
+    100% {
+      opacity: 0.2;
+    }
+    10% {
+      opacity: 1;
+    }
+    40% {
+      opacity: 0.35;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hud__dot,
+    .hud__bars span,
+    .hud__target::after,
+    .hud__target.is-glitching {
+      animation: none;
+    }
+
+    .hud__bars span:nth-child(-n + 7) {
+      opacity: 0.8;
+    }
+  }
+
+  .hero__rail {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.75rem;
+    color: var(--muted);
+    font-size: 0.55rem;
+    line-height: 1.9;
+  }
+
+  .hero__rail-line {
+    width: 1px;
+    height: 4.5rem;
+    margin-left: 1.5rem;
+    background: var(--border-strong);
+  }
+
+  .hero__rail-slashes {
+    color: var(--text);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 900px) {
+    .hero__art::after {
+      background: rgb(4 16 21 / 0.7);
+    }
+
+    .hero__rail {
+      display: none;
+    }
+
+    .hero__content {
+      max-width: none;
+    }
+  }
+</style>

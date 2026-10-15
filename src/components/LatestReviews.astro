@@ -1,0 +1,40 @@
+---
+import ReviewCard from './ReviewCard.astro';
+import SectionHeading from './SectionHeading.astro';
+import type { Review } from '../lib/types';
+
+interface Props {
+  reviews: Review[];
+}
+
+const { reviews } = Astro.props;
+---
+
+<section class="section">
+  <div class="container">
+    <SectionHeading label="Latest reviews" link={{ label: 'View all', href: '/reviews' }} />
+    <div class="grid">
+      {reviews.map((review, i) => <ReviewCard review={review} number={i + 1} />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  @media (max-width: 1000px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

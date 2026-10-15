@@ -1,0 +1,107 @@
+---
+/** Inline line icons used across the site. */
+interface Props {
+  name:
+    | 'arrow'
+    | 'search'
+    | 'menu'
+    | 'pen'
+    | 'gamepad'
+    | 'planet'
+    | 'mountain'
+    | 'gem'
+    | 'heart'
+    | 'youtube'
+    | 'x'
+    | 'instagram'
+    | 'link'
+    | 'logo';
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 20, class: className } = Astro.props;
+---
+
+<svg
+  class={className}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {name === 'arrow' && <path d="M5 12h14M13 6l6 6-6 6" />}
+  {name === 'search' && (
+    <>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m20 20-4.2-4.2" />
+    </>
+  )}
+  {name === 'menu' && <path d="M4 7h16M4 12h16M4 17h16" />}
+  {name === 'pen' && (
+    <>
+      <path d="M4 20l1.2-4.8L16.5 3.9a2 2 0 0 1 2.8 0l.8.8a2 2 0 0 1 0 2.8L8.8 18.8z" />
+      <path d="M14.5 6l3.5 3.5M4 20h7" />
+    </>
+  )}
+  {name === 'gamepad' && (
+    <>
+      <path d="M7 7h10a4 4 0 0 1 4 4.4l-.6 5A2.6 2.6 0 0 1 15.9 18l-1.6-2h-4.6l-1.6 2a2.6 2.6 0 0 1-4.5-1.6l-.6-5A4 4 0 0 1 7 7z" />
+      <path d="M8 10v3M6.5 11.5h3M15.5 11h.01M17.5 13h.01" />
+    </>
+  )}
+  {name === 'planet' && (
+    <>
+      <circle cx="12" cy="12" r="6" />
+      <path d="M5.2 9.6C2.4 11.3 1.2 13 1.8 14.1c.9 1.7 6.3.7 12-2.3s9.4-6.6 8.5-8.3c-.5-.9-2.3-1-4.7-.4" />
+    </>
+  )}
+  {name === 'mountain' && (
+    <>
+      <path d="M2 20 9.5 6 17 20z" />
+      <path d="M13 12.5 15.5 9 22 20h-5M7 11l2.5 2 2-1.5" />
+    </>
+  )}
+  {name === 'gem' && (
+    <>
+      <path d="M6.5 3.5h11L22 9l-10 11.5L2 9z" />
+      <path d="M2 9h20M9.5 3.5 8 9l4 11.5L16 9l-1.5-5.5" />
+    </>
+  )}
+  {name === 'heart' && (
+    <path d="M12 20s-7.5-4.6-9-9.4C2 7.4 4.2 4.5 7.3 4.5c2 0 3.5 1.1 4.7 2.8 1.2-1.7 2.7-2.8 4.7-2.8 3.1 0 5.3 2.9 4.3 6.1-1.5 4.8-9 9.4-9 9.4z" />
+  )}
+  {name === 'youtube' && (
+    <>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="3.5" />
+      <path d="m10 9.5 4.5 2.5-4.5 2.5z" />
+    </>
+  )}
+  {name === 'x' && <path d="M4 4l16 16M20 4 4 20" />}
+  {name === 'instagram' && (
+    <>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="M17 7h.01" />
+    </>
+  )}
+  {name === 'link' && (
+    <>
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+      <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+    </>
+  )}
+  {name === 'logo' && (
+    <>
+      {/* A hidden gem, locked on by HUD brackets */}
+      <path d="M2.5 7V2.5H7M17 2.5h4.5V7M21.5 17v4.5H17M7 21.5H2.5V17" />
+      <path d="M8.5 7.5h7l3 3.5L12 18.5 5.5 11z" fill="currentColor" fill-opacity="0.18" />
+      <path d="M8.5 7.5 12 11l3.5-3.5M5.5 11h13M12 11v7.5" />
+    </>
+  )}
+</svg>
