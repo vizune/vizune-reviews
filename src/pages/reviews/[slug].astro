@@ -270,20 +270,21 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
     max-width: 45rem;
   }
 
+  /* Centred 720px reading column (~75 characters per line) under the
+     1000px banner; text, images and comments all share it */
+  .review__body,
+  .review__comments-section,
+  .review__back {
+    max-width: 45rem;
+    margin-inline: auto;
+  }
+
   .review__body {
     margin-top: 2.25rem;
   }
 
-  /* Text keeps a readable ~70-character line... */
-  .review__body .prose > :global(*) {
-    max-width: 45rem;
-  }
-
-  /* ...while images span the full column, centred under the banner */
   .review__body .prose > :global(img) {
     width: 100%;
-    max-width: 100%;
-    margin-inline: auto;
   }
 
   .review__comments-section {

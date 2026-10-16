@@ -13,8 +13,8 @@ function altText(fields: { description?: unknown; title?: unknown }): string {
 /** How wide embedded images display on a normal page (the text column) */
 const DEFAULT_IMAGE_SIZES = '(min-width: 800px) 736px, 100vw';
 
-/** Review pages: images span the full 1000px column, like the banner */
-export const REVIEW_IMAGE_SIZES = '(min-width: 1100px) 1000px, 100vw';
+/** Review pages: images fill the centred 720px reading column */
+export const REVIEW_IMAGE_SIZES = '(min-width: 800px) 720px, 100vw';
 
 function options(imageSizes: string): Options {
   return {
