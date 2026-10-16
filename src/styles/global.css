@@ -250,6 +250,8 @@ p {
 }
 
 .prose img {
+  /* Centred when narrower than the column */
+  margin-inline: auto;
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }

@@ -7,7 +7,7 @@ import { getReviews } from '../../lib/contentful';
 import { formatDate, pad2 } from '../../lib/format';
 import { contentfulImage, contentfulSrcset } from '../../lib/images';
 import { IMAGE_SIZES, placeholdFor } from '../../lib/placeholder';
-import { renderRichText } from '../../lib/rich-text';
+import { REVIEW_IMAGE_SIZES, renderRichText } from '../../lib/rich-text';
 import type { Review } from '../../lib/types';
 
 export const getStaticPaths = (async () => {
@@ -21,7 +21,7 @@ interface Props {
 
 const { review } = Astro.props;
 const EMPTY_MESSAGE = 'This review is still being written.';
-const html = renderRichText(review.content);
+const html = renderRichText(review.content, REVIEW_IMAGE_SIZES);
 const [w, h] = IMAGE_SIZES.reviewFeature;
 const banner = review.bannerUrl;
 
@@ -95,7 +95,7 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
 
 <script>
   import { fetchLiveReview } from '../../lib/live-review';
-  import { renderRichText } from '../../lib/rich-text';
+  import { REVIEW_IMAGE_SIZES, renderRichText } from '../../lib/rich-text';
   import { contentfulImage, contentfulSrcset } from '../../lib/images';
   import { formatDate } from '../../lib/format';
 
@@ -133,7 +133,7 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
     }
 
     const prose = el.querySelector('.review__body .prose');
-    const html = renderRichText(review.content) || '<p>This review is still being written.</p>';
+    const html = renderRichText(review.content, REVIEW_IMAGE_SIZES) || '<p>This review is still being written.</p>';
     if (prose && prose.innerHTML !== html) prose.innerHTML = html;
   }
 
@@ -266,13 +266,24 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
   }
 
   /* Text stays ~70 characters per line for comfortable reading */
-  .review__body,
   .review__dek {
     max-width: 45rem;
   }
 
   .review__body {
     margin-top: 2.25rem;
+  }
+
+  /* Text keeps a readable ~70-character line... */
+  .review__body .prose > :global(*) {
+    max-width: 45rem;
+  }
+
+  /* ...while images span the full column, centred under the banner */
+  .review__body .prose > :global(img) {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
   }
 
   .review__comments-section {
