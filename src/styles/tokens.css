@@ -9,6 +9,8 @@
   --faint: #5f7d7d;
   --accent: #63d6c5;
   --accent-strong: #46e0cb;
+  /* Warning pink (also the glitch effect's second colour), used for spoilers */
+  --warn: #ff6fd8;
   --border: rgb(99 214 197 / 0.18);
   --border-strong: rgb(99 214 197 / 0.45);
   --glow: 0 0 24px rgb(99 214 197 / 0.25);

@@ -75,6 +75,8 @@ async function fetchReviews(): Promise<Review[]> {
     content_type: REVIEW_TYPE,
     order: ['fields.index'],
     limit: 1000,
+    // Review → embedded Spoiler entry → images inside the spoiler
+    include: 3,
   });
   if (res.items.length === 0) {
     console.warn(`[contentful] No published "${REVIEW_TYPE}" entries yet, using mock reviews.`);
@@ -134,6 +136,7 @@ export async function getPageBySlug(slug: string): Promise<Page | undefined> {
       content_type: 'page',
       'fields.slug': slug,
       limit: 1,
+      include: 3,
     });
     const entry = res.items[0];
     if (!entry) {

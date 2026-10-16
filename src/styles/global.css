@@ -308,6 +308,94 @@ p {
   }
 }
 
+/*
+ * Spoiler block (an embedded "Spoiler" entry in Contentful rich text).
+ * A native <details>, so it works with keyboards, screen readers and no JS.
+ */
+.spoiler {
+  margin: 2em 0;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background:
+    repeating-linear-gradient(0deg, rgb(255 111 216 / 0.03) 0 1px, transparent 1px 6px),
+    var(--surface);
+  transition: border-color 0.2s;
+}
+
+.spoiler[open] {
+  border-style: solid;
+  border-color: var(--accent);
+}
+
+.spoiler__summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.9rem;
+  padding: 0.95rem 1.15rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.spoiler__summary::-webkit-details-marker {
+  display: none;
+}
+
+.spoiler__summary:hover .spoiler__toggle {
+  color: var(--accent-strong);
+}
+
+.spoiler__tag {
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  font-size: 0.6rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgb(255 111 216 / 0.45);
+}
+
+.spoiler__label {
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* "REVEAL ▸" closed, "HIDE ▾" open */
+.spoiler__toggle {
+  margin-left: auto;
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.spoiler__toggle::before {
+  content: 'Reveal ▸';
+}
+
+.spoiler[open] .spoiler__toggle::before {
+  content: 'Hide ▾';
+}
+
+.spoiler[open] .spoiler__summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.spoiler__body {
+  padding: 1.1rem 1.25rem 1.3rem;
+}
+
+.spoiler__body > * + * {
+  margin-top: 1.25em;
+}
+
 .prose img {
   /* Centred when narrower than the column */
   margin-inline: auto;

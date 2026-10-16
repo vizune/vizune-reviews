@@ -3,6 +3,11 @@ import { BLOCKS, type Document } from '@contentful/rich-text-types';
 import { contentfulImage, contentfulSrcset } from './images';
 
 const escapeAttr = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** Content type ID of the embeddable "Spoiler" entry in Contentful */
+export const SPOILER_TYPE = 'spoiler';
 
 /** Alt text: the asset's Description, else its title made readable ("top-20-games" → "top 20 games"). */
 function altText(fields: { description?: unknown; title?: unknown }): string {
@@ -37,6 +42,28 @@ function options(imageSizes: string): Options {
         const src = contentfulImage(url, Math.min(image.width, 960));
 
         return `<img src="${escapeAttr(src)}" srcset="${escapeAttr(contentfulSrcset(url, widths))}" sizes="${imageSizes}" width="${image.width}" height="${image.height}" alt="${escapeAttr(altText(fields))}" loading="lazy" decoding="async" />`;
+      },
+
+      // Embedded "Spoiler" entries become a click-to-reveal <details> block
+      [BLOCKS.EMBEDDED_ENTRY]: (node) => {
+        const target = node.data.target;
+        if (target?.sys?.contentType?.sys?.id !== SPOILER_TYPE) return '';
+
+        const label = String(target.fields?.label || 'Spoiler');
+        const inner = target.fields?.content
+          ? documentToHtmlString(target.fields.content as Document, options(imageSizes))
+          : '';
+
+        return (
+          `<details class="spoiler">` +
+          `<summary class="spoiler__summary">` +
+          `<span class="spoiler__tag">⚠ Spoiler</span>` +
+          `<span class="spoiler__label">${escapeHtml(label)}</span>` +
+          `<span class="spoiler__toggle" aria-hidden="true"></span>` +
+          `</summary>` +
+          `<div class="spoiler__body">${inner}</div>` +
+          `</details>`
+        );
       },
     },
   };
