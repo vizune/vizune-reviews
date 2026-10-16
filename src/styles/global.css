@@ -241,12 +241,71 @@ p {
   text-underline-offset: 3px;
 }
 
+/* Pull quote: lit HUD panel with a glowing accent bar and big corner quote marks */
 .prose blockquote {
-  margin-inline: 0;
-  padding-left: 1.25rem;
-  border-left: 2px solid var(--accent);
+  position: relative;
+  margin: 2.25em 0;
+  padding: 2.25rem 2.5rem 2.25rem 2.75rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background:
+    linear-gradient(90deg, rgb(99 214 197 / 0.1), transparent 70%),
+    repeating-linear-gradient(0deg, rgb(99 214 197 / 0.03) 0 1px, transparent 1px 6px),
+    var(--surface);
+  box-shadow:
+    -6px 0 18px -10px var(--accent),
+    inset 0 0 40px rgb(0 0 0 / 0.25);
   color: var(--text);
+  font-size: 1.15em;
   font-style: italic;
+  line-height: 1.7;
+}
+
+.prose blockquote > * + * {
+  margin-top: 0.9em;
+}
+
+.prose blockquote::before,
+.prose blockquote::after {
+  position: absolute;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 4.5rem;
+  font-style: normal;
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 18px rgb(99 214 197 / 0.5);
+  pointer-events: none;
+}
+
+.prose blockquote::before {
+  content: '\201C';
+  top: 0.35rem;
+  left: 0.6rem;
+}
+
+.prose blockquote::after {
+  content: '\201D';
+  right: 0.9rem;
+  bottom: -1.6rem;
+  opacity: 0.55;
+}
+
+@media (max-width: 560px) {
+  .prose blockquote {
+    padding: 2rem 1.25rem 2rem 1.75rem;
+    font-size: 1.05em;
+  }
+
+  .prose blockquote::before,
+  .prose blockquote::after {
+    font-size: 3.5rem;
+  }
+
+  .prose blockquote::before {
+    top: 0.2rem;
+    left: 0.35rem;
+  }
 }
 
 .prose img {
