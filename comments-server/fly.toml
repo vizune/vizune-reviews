@@ -1,0 +1,39 @@
+# Remark42 comments server for Vizune Reviews, hosted on Fly.io.
+# Setup steps are in README.md next to this file.
+
+# Must be unique across all of Fly.io. Change it if it's taken,
+# and update REMARK_URL below to match.
+app = "vizune-comments"
+primary_region = "lhr" # London
+
+[build]
+  image = "umputun/remark42:latest"
+
+[env]
+  # This server's own public address (no trailing slash)
+  REMARK_URL = "https://vizune-comments.fly.dev"
+  # Matches PUBLIC_REMARK42_SITE_ID on the site (default "remark")
+  SITE = "remark"
+  # Visitors can comment with just a name, no account needed
+  AUTH_ANON = "true"
+  # Only your site (and local dev) may embed the comments
+  ALLOWED_HOSTS = "'self',https://vizune.nekoweb.org,http://localhost:4321"
+  TIME_ZONE = "Europe/London"
+
+# Comments live here. Remark42 also writes a daily backup to /srv/var/backup.
+[mounts]
+  source = "remark42_data"
+  destination = "/srv/var"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Sleeps when nobody's visiting and wakes on the next request,
+  # so you only pay for the time it's running
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

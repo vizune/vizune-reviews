@@ -35,7 +35,7 @@ const srcset = review.bannerUrl ? contentfulSrcset(review.bannerUrl, [600, 900, 
       <span class="accent">{review.subject}</span>
     </p>
     <h2 class="feature__title">{review.headline}</h2>
-    {review.excerpt && <p class="feature__excerpt">{review.excerpt}</p>}
+    <!-- {review.excerpt && <p class="feature__excerpt">{review.excerpt}</p>} -->
     <div class="feature__foot">
       <time class="label" datetime={review.publishDate}>{formatDate(review.publishDate)}</time>
       <span class="feature__cta label">Read review <Icon name="arrow" size={14} /></span>

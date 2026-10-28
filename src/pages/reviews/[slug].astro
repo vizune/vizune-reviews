@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
+import Comments from '../../components/Comments.astro';
 import Icon from '../../components/Icon.astro';
 import { getReviews } from '../../lib/contentful';
 import { formatDate, pad2 } from '../../lib/format';
@@ -61,6 +62,8 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
         <a class="review__comments" href="#comments">
           <Icon name="comment" size={15} />
           Comments
+          {/* Filled in by Remark42 with the comment count; stays hidden until then */}
+          <span class="review__count remark42__counter"></span>
         </a>
       </div>
     </header>
@@ -82,10 +85,7 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
       <div class="prose" set:html={html || `<p>${EMPTY_MESSAGE}</p>`} />
     </div>
 
-    <section class="review__comments-section" id="comments" aria-labelledby="comments-title">
-      <h2 id="comments-title" class="label">Comments</h2>
-      <p>Comments are coming soon.</p>
-    </section>
+    <Comments slug={review.slug} />
 
     <div class="review__back">
       <Button href="/reviews" arrow>All reviews</Button>
@@ -240,14 +240,88 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
   }
 
   .review__comments {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
     color: var(--accent);
+    transition:
+      color 0.2s,
+      text-shadow 0.2s;
   }
 
-  .review__comments:hover {
+  /* HUD-style underline that scans in from the left on hover */
+  .review__comments::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.3rem;
+    height: 1px;
+    background: currentColor;
+    box-shadow: var(--glow);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease-out;
+  }
+
+  .review__comments :global(svg) {
+    transition: transform 0.2s ease-out;
+  }
+
+  .review__count:empty {
+    display: none;
+  }
+
+  .review__count {
+    min-width: 1.4em;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid currentColor;
+    font-size: 0.85em;
+    line-height: 1;
+    text-align: center;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .review__comments:hover,
+  .review__comments:focus-visible {
     color: var(--accent-strong);
+    text-shadow: 0 0 10px rgb(99 214 197 / 0.45);
+  }
+
+  .review__comments:hover::after,
+  .review__comments:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* Speech bubble gives a small hop */
+  .review__comments:hover :global(svg),
+  .review__comments:focus-visible :global(svg) {
+    transform: translateY(-2px);
+  }
+
+  /* Count badge lights up */
+  .review__comments:hover .review__count,
+  .review__comments:focus-visible .review__count {
+    background: var(--accent-strong);
+    color: var(--bg);
+    text-shadow: none;
+    box-shadow: var(--glow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .review__comments::after,
+    .review__comments :global(svg) {
+      transition: none;
+    }
+
+    .review__comments:hover :global(svg),
+    .review__comments:focus-visible :global(svg) {
+      transform: none;
+    }
   }
 
   .review__banner {
@@ -271,9 +345,8 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
   }
 
   /* Centred 720px reading column (~75 characters per line) under the
-     1000px banner; text, images and comments all share it */
+     1000px banner; text, images and comments (Comments.astro) all share it */
   .review__body,
-  .review__comments-section,
   .review__back {
     max-width: 45rem;
     margin-inline: auto;
@@ -285,20 +358,6 @@ const environment = import.meta.env.CONTENTFUL_ENVIRONMENT || 'master';
 
   .review__body .prose > :global(img) {
     width: 100%;
-  }
-
-  .review__comments-section {
-    margin-top: 3.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-    color: var(--muted);
-    /* Leave a little room above when jumping here from the Comments link */
-    scroll-margin-top: 2rem;
-  }
-
-  .review__comments-section h2 {
-    margin-bottom: 0.75rem;
-    color: var(--text);
   }
 
   .review__back {

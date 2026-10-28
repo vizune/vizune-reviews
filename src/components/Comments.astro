@@ -1,0 +1,85 @@
+---
+/**
+ * Remark42 comments for a review.
+ * Shows "coming soon" until PUBLIC_REMARK42_HOST is set, so the site can
+ * build and deploy before the comments server exists.
+ */
+interface Props {
+  /** Review slug, used to give each review its own comment thread */
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const host = import.meta.env.PUBLIC_REMARK42_HOST?.replace(/\/$/, '');
+const siteId = import.meta.env.PUBLIC_REMARK42_SITE_ID || 'remark';
+// A fixed public origin keeps one thread per review, even when testing locally
+const origin = import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, '');
+const path = `/reviews/${slug}/`;
+---
+
+<section class="comments" id="comments" aria-labelledby="comments-title">
+  <h2 id="comments-title" class="label">Comments</h2>
+  {
+    host ? (
+      <div
+        id="remark42"
+        data-host={host}
+        data-site-id={siteId}
+        data-origin={origin}
+        data-path={path}
+      >
+        <noscript>Comments need JavaScript turned on.</noscript>
+      </div>
+    ) : (
+      <p>Comments are coming soon.</p>
+    )
+  }
+</section>
+
+<script>
+  const el = document.getElementById('remark42');
+  if (el) {
+    const { host, siteId, origin, path } = el.dataset;
+    const config = {
+      host,
+      site_id: siteId,
+      url: (origin || location.origin) + path,
+      // 'counter' fills any .remark42__counter on the page (e.g. the
+      // Comments link at the top of the review) with the comment count
+      components: ['embed', 'counter'],
+      theme: 'dark',
+      locale: 'en',
+      show_email_subscription: false,
+      no_footer: true,
+    };
+    (window as unknown as { remark_config: typeof config }).remark_config = config;
+
+    // Official Remark42 loader: module build for modern browsers, legacy fallback otherwise
+    for (const component of config.components) {
+      const script = document.createElement('script');
+      const modern = 'noModule' in script;
+      if (modern) script.type = 'module';
+      else script.async = true;
+      script.defer = true;
+      script.src = `${host}/web/${component}${modern ? '.mjs' : '.js'}`;
+      (document.head || document.body).appendChild(script);
+    }
+  }
+</script>
+
+<style>
+  .comments {
+    max-width: 45rem;
+    margin: 3.5rem auto 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    /* Leave a little room above when jumping here from the Comments link */
+    scroll-margin-top: 2rem;
+  }
+
+  .comments h2 {
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+</style>
