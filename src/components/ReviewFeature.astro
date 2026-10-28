@@ -9,15 +9,24 @@ interface Props {
   review: Review;
   number: number;
   eager?: boolean;
+  /** Analytics label for the list this card sits in */
+  list?: string;
 }
 
-const { review, number, eager = false } = Astro.props;
+const { review, number, eager = false, list = 'reviews_page' } = Astro.props;
 const [w, h] = IMAGE_SIZES.reviewFeature;
 const src = review.bannerUrl ? contentfulImage(review.bannerUrl, 1200) : placeholdFor('reviewFeature');
 const srcset = review.bannerUrl ? contentfulSrcset(review.bannerUrl, [600, 900, 1200]) : undefined;
 ---
 
-<a class="feature" href={`/reviews/${review.slug}`}>
+<a
+  class="feature"
+  href={`/reviews/${review.slug}`}
+  data-review-slug={review.slug}
+  data-review-title={review.subject}
+  data-review-list={list}
+  data-review-position={number}
+>
   <img
     class="feature__img"
     src={src}

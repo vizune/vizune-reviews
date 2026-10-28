@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 import { site } from '../data/site';
 
 interface Props {
@@ -12,6 +13,11 @@ interface Props {
 const { title, description = site.description } = Astro.props;
 // Skip the " — Vizune Reviews" suffix when the title already says it
 const pageTitle = !title ? site.name : title.includes(site.name) ? title : `${title} — ${site.name}`;
+// Google Analytics 4 measurement ID (G-XXXXXXXXXX). Analytics and the cookie
+// banner are off when it's empty. In `npm run dev` the banner shows (so you can
+// see it) but Analytics never loads; it only runs in built pages.
+const gaId = import.meta.env.PUBLIC_GA_ID;
+const tracking = import.meta.env.PROD;
 ---
 
 <!doctype html>
@@ -30,6 +36,71 @@ const pageTitle = !title ? site.name : title.includes(site.name) ? title : `${ti
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Michroma&display=swap"
       rel="stylesheet"
     />
+
+    {
+      gaId && (
+        <script is:inline define:vars={{ gaId, tracking }}>
+          // Loads Google Analytics only after the visitor accepts cookies
+          // (CookieBanner calls start/stop), and never on this computer
+          const local = ['localhost', '127.0.0.1', '[::1]', ''].includes(location.hostname);
+          let started = false;
+
+          window.vizuneAnalytics = {
+            start() {
+              window[`ga-disable-${gaId}`] = false;
+              if (started || !tracking || local) return;
+              started = true;
+
+              const tag = document.createElement('script');
+              tag.async = true;
+              tag.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+              document.head.appendChild(tag);
+
+              window.dataLayer = window.dataLayer || [];
+              window.gtag = function () {
+                window.dataLayer.push(arguments);
+              };
+              window.gtag('js', new Date());
+              window.gtag('config', gaId);
+            },
+
+            // Visitor changed their mind: stop sending and remove GA's cookies
+            stop() {
+              window[`ga-disable-${gaId}`] = true;
+              const parts = location.hostname.split('.');
+              const domains = [''];
+              for (let i = 0; i < parts.length - 1; i++) domains.push(`; domain=.${parts.slice(i).join('.')}`);
+              document.cookie.split(';').forEach((cookie) => {
+                const name = cookie.split('=')[0].trim();
+                if (!name.startsWith('_ga')) return;
+                domains.forEach((domain) => {
+                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
+                });
+              });
+            },
+          };
+
+          try {
+            if (localStorage.getItem('vizune-consent') === 'granted') window.vizuneAnalytics.start();
+          } catch {
+            // Storage blocked: treat as no consent
+          }
+
+          // Review clicks: any link with data-review-slug sends a "select_review"
+          // event saying which review, which list it was in and where in the list
+          document.addEventListener('click', (event) => {
+            const link = event.target instanceof Element && event.target.closest('a[data-review-slug]');
+            if (!link || !window.gtag) return;
+            window.gtag('event', 'select_review', {
+              review_slug: link.dataset.reviewSlug,
+              review_title: link.dataset.reviewTitle,
+              list_name: link.dataset.reviewList,
+              position: Number(link.dataset.reviewPosition) || undefined,
+            });
+          });
+        </script>
+      )
+    }
   </head>
   <body>
     <div class="site">
@@ -39,5 +110,6 @@ const pageTitle = !title ? site.name : title.includes(site.name) ? title : `${ti
       </main>
       <Footer />
     </div>
+    {gaId && <CookieBanner />}
   </body>
 </html>

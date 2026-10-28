@@ -1,0 +1,173 @@
+---
+/**
+ * Cookie consent for Google Analytics. Shown until the visitor chooses;
+ * the footer's "Cookie settings" link reopens it. Analytics only loads
+ * after "Accept" (see the analytics script in BaseLayout).
+ */
+---
+
+<section class="consent" data-consent hidden aria-labelledby="consent-title">
+  <span class="brackets" aria-hidden="true"></span>
+  <p class="consent__label label" id="consent-title">
+    <span class="accent">▸ Cookies</span> <span class="consent__sep" aria-hidden="true">//</span> Optional
+  </p>
+  <p class="consent__text">
+    I'd like to use Google Analytics cookies to see which reviews people enjoy. They're optional, and the site works
+    exactly the same if you say no.
+  </p>
+  <div class="consent__actions">
+    <button class="consent__btn" type="button" data-consent-choice="denied">Reject</button>
+    <button class="consent__btn" type="button" data-consent-choice="granted">Accept</button>
+  </div>
+</section>
+
+<script>
+  type Choice = 'granted' | 'denied';
+  type Analytics = { start: () => void; stop: () => void };
+
+  const KEY = 'vizune-consent';
+  const banner = document.querySelector<HTMLElement>('[data-consent]');
+  const analytics = () => (window as unknown as { vizuneAnalytics?: Analytics }).vizuneAnalytics;
+
+  const readChoice = (): string | null => {
+    try {
+      return localStorage.getItem(KEY);
+    } catch {
+      return null;
+    }
+  };
+
+  const saveChoice = (choice: Choice) => {
+    try {
+      localStorage.setItem(KEY, choice);
+    } catch {
+      // Storage blocked: the choice still applies to this page
+    }
+  };
+
+  const show = (focus = false) => {
+    if (!banner) return;
+    banner.hidden = false;
+    if (focus) banner.querySelector('button')?.focus();
+  };
+
+  const hide = () => {
+    if (banner) banner.hidden = true;
+  };
+
+  if (banner) {
+    if (!readChoice()) show();
+
+    banner.addEventListener('click', (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>('[data-consent-choice]');
+      if (!button) return;
+      const choice = button.dataset.consentChoice as Choice;
+      saveChoice(choice);
+      hide();
+      if (choice === 'granted') analytics()?.start();
+      else analytics()?.stop();
+    });
+
+    banner.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && readChoice()) hide();
+    });
+
+    document.querySelectorAll('[data-consent-open]').forEach((el) => el.addEventListener('click', () => show(true)));
+  }
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    right: var(--gutter);
+    bottom: var(--gutter);
+    z-index: 50;
+    width: min(26rem, calc(100vw - 2 * var(--gutter)));
+    padding: 1.25rem 1.35rem 1.35rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: rgb(10 32 39 / 0.94);
+    box-shadow:
+      var(--glow),
+      0 12px 40px rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(8px);
+    animation: consent-in 0.35s ease-out both;
+  }
+
+  .consent[hidden] {
+    display: none;
+  }
+
+  /* Corner brackets stay lit, like a HUD prompt */
+  .consent .brackets::before,
+  .consent .brackets::after {
+    opacity: 1;
+    transform: none;
+  }
+
+  .consent__label {
+    color: var(--muted);
+  }
+
+  .consent__sep {
+    color: var(--accent);
+    opacity: 0.6;
+  }
+
+  .consent__text {
+    margin: 0.7rem 0 1.1rem;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+
+  .consent__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Both choices look the same, so neither is nudged */
+  .consent__btn {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .consent__btn:hover {
+    background: rgb(99 214 197 / 0.1);
+    box-shadow: var(--glow);
+  }
+
+  @keyframes consent-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .consent {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .consent {
+      right: 16px;
+      bottom: 16px;
+      width: calc(100vw - 32px);
+    }
+  }
+</style>

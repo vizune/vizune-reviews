@@ -5,6 +5,8 @@ import Tagline from './Tagline.astro';
 import { nav, network, site } from '../data/site';
 
 const year = new Date().getFullYear();
+// Matches the cookie banner, which only exists when Analytics is set up
+const hasCookies = Boolean(import.meta.env.PUBLIC_GA_ID);
 ---
 
 <footer class="footer">
@@ -34,6 +36,15 @@ const year = new Date().getFullYear();
               <a href={item.href} {...(item.external && { target: '_blank', rel: 'noopener' })}>{item.label}</a>
             </li>
           ))}
+          {
+            hasCookies && (
+              <li>
+                <button class="footer__link-btn" type="button" data-consent-open>
+                  Cookie settings
+                </button>
+              </li>
+            )
+          }
         </ul>
       </nav>
     </div>
@@ -162,8 +173,19 @@ const year = new Date().getFullYear();
     color: var(--muted);
   }
 
-  .footer__bottom a:hover {
+  .footer__bottom a:hover,
+  .footer__link-btn:hover {
     color: var(--accent);
+  }
+
+  /* Looks like the footer links, but opens the cookie banner */
+  .footer__link-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
   }
 
   @media (max-width: 760px) {

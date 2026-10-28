@@ -7,14 +7,23 @@ import { pad2 } from '../lib/format';
 interface Props {
   review: Review;
   number: number;
+  /** Analytics label for the list this card sits in */
+  list?: string;
 }
 
-const { review, number } = Astro.props;
+const { review, number, list = 'homepage_latest' } = Astro.props;
 const [w, h] = IMAGE_SIZES.reviewCard;
 const thumb = review.thumbnailUrl;
 ---
 
-<a class="card" href={`/reviews/${review.slug}`}>
+<a
+  class="card"
+  href={`/reviews/${review.slug}`}
+  data-review-slug={review.slug}
+  data-review-title={review.subject}
+  data-review-list={list}
+  data-review-position={number}
+>
   <div class="card__media">
     <img
       src={thumb ? contentfulImage(thumb, 480) : placeholdFor('reviewCard')}
