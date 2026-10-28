@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import Chatbox from '../components/Chatbox.astro';
 import { site } from '../data/site';
 
 interface Props {
@@ -110,6 +111,7 @@ const tracking = import.meta.env.PROD;
       </main>
       <Footer />
     </div>
+    <Chatbox />
     {gaId && <CookieBanner />}
   </body>
 </html>

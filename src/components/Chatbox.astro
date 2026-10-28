@@ -1,0 +1,201 @@
+---
+/**
+ * Slide-out Cbox chat on the right edge of every page. The tab opens and
+ * closes it; Cbox itself only loads the first time it's opened.
+ */
+const src = 'https://www5.cbox.ws/box/?boxid=968406&boxtag=3NLg9e';
+---
+
+<aside class="chatbox" data-chatbox>
+  <button class="chatbox__tab label" type="button" aria-expanded="false" aria-controls="chatbox-panel" data-chatbox-toggle>
+    <span class="chatbox__dot" aria-hidden="true"></span>Chatbox
+  </button>
+
+  <section class="chatbox__panel" id="chatbox-panel" aria-labelledby="chatbox-title" hidden>
+    <span class="brackets" aria-hidden="true"></span>
+    <header class="chatbox__head">
+      <p class="chatbox__label label" id="chatbox-title">
+        <span class="accent">▸ Chatbox</span> <span class="chatbox__sep" aria-hidden="true">//</span> Say hi
+      </p>
+      <button class="chatbox__close" type="button" aria-label="Close chatbox" data-chatbox-close>×</button>
+    </header>
+    <iframe class="chatbox__frame" data-src={src} title="Chatbox" allow="autoplay"></iframe>
+  </section>
+</aside>
+
+<script>
+  const box = document.querySelector<HTMLElement>('[data-chatbox]');
+  const toggle = box?.querySelector<HTMLButtonElement>('[data-chatbox-toggle]');
+  const panel = box?.querySelector<HTMLElement>('.chatbox__panel');
+  const frame = box?.querySelector<HTMLIFrameElement>('iframe');
+
+  const setOpen = (open: boolean) => {
+    if (!box || !toggle || !panel || !frame) return;
+    if (open && !frame.src) frame.src = frame.dataset.src ?? '';
+    // Unhide first so the slide animates in
+    if (open) panel.hidden = false;
+    requestAnimationFrame(() => box.classList.toggle('is-open', open));
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+
+  if (box && toggle && panel) {
+    toggle.addEventListener('click', () => setOpen(!box.classList.contains('is-open')));
+    box.querySelector('[data-chatbox-close]')?.addEventListener('click', () => {
+      setOpen(false);
+      toggle.focus();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && box.classList.contains('is-open')) setOpen(false);
+    });
+    // Hide the closed panel from tab order once it has slid away
+    panel.addEventListener('transitionend', (event) => {
+      if (event.target === panel && !box.classList.contains('is-open')) panel.hidden = true;
+    });
+  }
+</script>
+
+<style>
+  .chatbox {
+    --chat-width: min(22rem, calc(100vw - 3rem));
+    position: fixed;
+    top: 50%;
+    right: 0;
+    /* Above the cookie banner (50): the visitor opened the chat on purpose,
+       and the banner is back in view as soon as they close it */
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .chatbox__tab,
+  .chatbox__panel {
+    pointer-events: auto;
+  }
+
+  /* Vertical tab stuck to the panel's left edge */
+  .chatbox__tab {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1.1rem 0.6rem;
+    /* Rotated 180°, so the left/right borders and corners are swapped */
+    border: 1px solid var(--border-strong);
+    border-left: 0;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: rgb(10 32 39 / 0.94);
+    color: var(--accent);
+    font-family: inherit;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition:
+      color 0.2s,
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .chatbox__tab:hover,
+  .chatbox__tab:focus-visible,
+  .chatbox.is-open .chatbox__tab {
+    border-color: var(--accent);
+    color: var(--text);
+    box-shadow: var(--glow);
+  }
+
+  .chatbox__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  .chatbox__panel {
+    position: relative;
+    width: var(--chat-width);
+    margin-right: calc(-1 * var(--chat-width));
+    padding: 1rem 1rem 1.1rem;
+    border: 1px solid var(--border-strong);
+    border-right: 0;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: rgb(10 32 39 / 0.94);
+    box-shadow:
+      var(--glow),
+      0 12px 40px rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(8px);
+    transition: margin-right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .chatbox.is-open .chatbox__panel {
+    margin-right: 0;
+  }
+
+  .chatbox__panel[hidden] {
+    display: block;
+    visibility: hidden;
+  }
+
+  /* Corner brackets stay lit, like the cookie banner */
+  .chatbox .brackets::before,
+  .chatbox .brackets::after {
+    opacity: 1;
+    transform: none;
+  }
+
+  .chatbox__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .chatbox__label {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .chatbox__sep {
+    color: var(--accent);
+    opacity: 0.6;
+  }
+
+  .chatbox__close {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      color 0.2s;
+  }
+
+  .chatbox__close:hover,
+  .chatbox__close:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .chatbox__frame {
+    display: block;
+    width: 100%;
+    height: min(450px, 65vh);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg-deep);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chatbox__panel {
+      transition: none;
+    }
+  }
+</style>
