@@ -19,3 +19,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# One-off comment import (contains commenters names)
+comments-server/disqus-import.xml

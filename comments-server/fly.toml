@@ -12,13 +12,18 @@ primary_region = "lhr" # London
 [env]
   # This server's own public address (no trailing slash)
   REMARK_URL = "https://vizune-comments.fly.dev"
-  # Matches PUBLIC_REMARK42_SITE_ID on the site (default "remark")
-  SITE = "remark"
+  # One ID per site: "remark" = Vizune Reviews, "design" = Vizune Designs
+  SITE = "remark,design"
   # Visitors can comment with just a name, no account needed
   AUTH_ANON = "true"
-  # Only your site (and local dev) may embed the comments
-  ALLOWED_HOSTS = "'self',https://vizune.nekoweb.org,http://localhost:4321"
+  # Only your sites (and local dev) may embed the comments
+  ALLOWED_HOSTS = "'self',https://vizune.nekoweb.org,https://vizune.neocities.org,http://localhost:4321"
   TIME_ZONE = "Europe/London"
+  # The widget is embedded on other domains, where browsers block or partition
+  # its cookies. These send the login as a header instead, so guest comments
+  # work in Firefox, Safari and Chrome.
+  AUTH_SAME_SITE = "none"
+  AUTH_SEND_JWT_HEADER = "true"
 
 # Comments live here. Remark42 also writes a daily backup to /srv/var/backup.
 [mounts]
